@@ -1198,15 +1198,15 @@ try{
       <div class="login-highlights"><div><span class="highlight-icon">↗</span><div><b>Pantau pergerakan stok</b><small>Ringkasan barang masuk dan keluar</small></div></div><div><span class="highlight-icon">▦</span><div><b>Data terpusat</b><small>Informasi barang dalam satu tampilan</small></div></div></div>
       <div class="login-footer-note">JMAB INVENTORY <span>•</span> WAREHOUSE OPERATIONS</div>
     </section>
-    <section class="login-card-wrap"><form id="loginForm" class="login-card" autocomplete="on">
+    <section class="login-card-wrap"><form id="loginForm" class="login-card" autocomplete="off">
       <div class="login-card-head"><span class="login-lock">♧</span><div><h2>Selamat datang</h2><p>Masuk untuk melanjutkan ke workspace Anda.</p></div></div>
-      <div class="login-field"><label for="loginUser">Email / Username</label><div class="login-input-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><input id="loginUser" name="username" type="email" placeholder="Pilih atau ketik email terdaftar" autocomplete="username" autocapitalize="none" spellcheck="false" aria-autocomplete="list" aria-controls="jmabRegisteredEmailSuggestions" aria-expanded="false" required><div id="jmabRegisteredEmailSuggestions" class="login-email-suggestions" role="listbox" hidden></div></div></div>
-      <div class="login-field"><label for="loginPassword">Kata sandi</label><div class="login-input-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3"/></svg><input id="loginPassword" name="password" type="password" placeholder="Kata sandi akun" autocomplete="current-password" required><button class="password-toggle" id="togglePassword" type="button" aria-label="Tampilkan kata sandi" title="Tampilkan kata sandi">◉</button></div></div>
+      <div class="login-field"><label for="loginUser">Email / Username</label><div class="login-input-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><input id="loginUser" name="jmab-login-email-entry" type="email" placeholder="Pilih atau ketik email terdaftar" autocomplete="off" autocapitalize="none" spellcheck="false" aria-autocomplete="list" aria-controls="jmabRegisteredEmailSuggestions" aria-expanded="false" required><div id="jmabRegisteredEmailSuggestions" class="login-email-suggestions" role="listbox" hidden></div></div></div>
+      <div class="login-field"><label for="loginPassword">Kata sandi</label><div class="login-input-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3"/></svg><input id="loginPassword" name="jmab-login-password-entry" type="password" placeholder="Kata sandi akun" autocomplete="new-password" required><button class="password-toggle" id="togglePassword" type="button" aria-label="Tampilkan kata sandi" title="Tampilkan kata sandi">◉</button></div></div>
       <div class="login-options"><label class="remember-label"><input type="checkbox" id="rememberLogin"> <span>Ingat saya di sesi ini</span></label><span class="secure-note"><span>●</span> Akses workspace</span></div>
       <div class="login-forgot-row"><button type="button" id="forgotPasswordButton" class="login-text-button">Lupa kata sandi?</button></div>
       <p id="loginError" class="login-error" role="alert" hidden></p>
       <button class="login-submit" type="submit"><span>Masuk ke workspace</span><b>→</b></button>
-      <div class="login-demo"><b>Login akun perusahaan</b><span>Login menggunakan akun JMAB yang terdaftar.</span><small>Gunakan email dan kata sandi akun yang sudah dibuat di proyek Supabase baru.</small></div>
+
     </form>
     <form id="resetPasswordForm" class="login-card jmab-reset-card" autocomplete="off" hidden>
       <div class="login-card-head"><span class="login-lock">↻</span><div><h2>Buat kata sandi baru</h2><p>Masukkan kata sandi baru untuk akun JMAB Anda.</p></div></div>
@@ -2007,6 +2007,23 @@ async function restoreInventorySession(){
 /* Biarkan browser/password manager mengisi kredensial tersimpan.
    Field tidak dikosongkan otomatis agar autofill tidak terhapus. */
 /* Saran hanya memuat email yang pernah berhasil login dan lolos validasi profil JMAB pada browser ini. */
+(function suppressBrowserLoginAutofill(){
+  const form=document.getElementById('loginForm');
+  const email=document.getElementById('loginUser');
+  const password=document.getElementById('loginPassword');
+  if(form)form.setAttribute('autocomplete','off');
+  if(email){
+    email.setAttribute('autocomplete','off');
+    email.setAttribute('autocorrect','off');
+    email.setAttribute('data-lpignore','true');
+    email.setAttribute('data-1p-ignore','');
+  }
+  if(password){
+    password.setAttribute('autocomplete','new-password');
+    password.setAttribute('data-lpignore','true');
+    password.setAttribute('data-1p-ignore','');
+  }
+})();
 (function setupRegisteredEmailSuggestions(){
   const input=document.getElementById('loginUser');
   const list=document.getElementById('jmabRegisteredEmailSuggestions');
@@ -2041,8 +2058,7 @@ async function restoreInventorySession(){
         input.value=email;
         input.dispatchEvent(new Event('input',{bubbles:true}));
         hideSuggestions();
-        /* Fokus password agar browser dapat menawarkan kredensial tersimpan untuk email ini. */
-        password?.focus();
+        /* Tetap di kolom email agar Chrome Password Manager tidak membuka daftar akun tersimpan. */
       });
       list.appendChild(option);
     });
